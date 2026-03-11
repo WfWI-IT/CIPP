@@ -91,7 +91,7 @@ const Page = () => {
         Endpoint: "users",
         manualPagination: true,
         $select:
-          "id,accountEnabled,businessPhones,city,createdDateTime,companyName,country,department,displayName,faxNumber,givenName,isResourceAccount,jobTitle,mail,mailNickname,mobilePhone,officeLocation,otherMails,postalCode,preferredDataLocation,preferredLanguage,proxyAddresses,showInAddressList,state,streetAddress,surname,usageLocation,userPrincipalName,userType,assignedLicenses,licenseAssignmentStates,onPremisesSyncEnabled,OnPremisesImmutableId,onPremisesLastSyncDateTime,onPremisesDistinguishedName",
+          "id,accountEnabled,businessPhones,city,createdDateTime,companyName,country,department,displayName,faxNumber,givenName,isResourceAccount,jobTitle,mail,mailNickname,mobilePhone,officeLocation,otherMails,postalCode,preferredDataLocation,preferredLanguage,proxyAddresses,showInAddressList,state,streetAddress,surname,usageLocation,userPrincipalName,userType,assignedLicenses,licenseAssignmentStates,onPremisesSyncEnabled,OnPremisesImmutableId,onPremisesLastSyncDateTime,onPremisesDistinguishedName,extutvjwj5c_bambooUser",
         $count: true,
         $orderby: "displayName",
         $top: 999,
@@ -99,7 +99,7 @@ const Page = () => {
       apiDataKey="Results"
       actions={userActions}
       offCanvas={offCanvas}
-      simpleColumns={[
+simpleColumns={[
         "accountEnabled",
         "userPrincipalName",
         "displayName",
@@ -108,6 +108,14 @@ const Page = () => {
         "proxyAddresses",
         "assignedLicenses",
         "licenseAssignmentStates",
+        "extutvjwj5c_bambooUser.twitter",
+        "extutvjwj5c_bambooUser.isGSCmember",
+        "extutvjwj5c_bambooUser.unit",
+        "extutvjwj5c_bambooUser.dottedLineManager",
+        "extutvjwj5c_bambooUser.emailUserType",
+        "extutvjwj5c_bambooUser.intacctBudgetCode",
+        "extutvjwj5c_bambooUser.Division",
+        "extutvjwj5c_bambooUser.employementStatus",
       ]}
       filters={filters}
     />
