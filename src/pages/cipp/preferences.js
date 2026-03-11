@@ -187,6 +187,14 @@ const Page = () => {
     { value: "otherMails", label: "otherMails" },
     { value: "showInAddressList", label: "showInAddressList" },
     { value: "sponsor", label: "sponsor" },
+    { value: "extutvjwj5c_bambooUser.twitter", label: "twitter" },
+    { value: "extutvjwj5c_bambooUser.isGSCmember", label: "Is GSC Member?" },
+    { value: "extutvjwj5c_bambooUser.unit", label: "Unit" },
+    { value: "extutvjwj5c_bambooUser.dottedLineManager", label: "Dotted Line Manager" },
+    { value: "extutvjwj5c_bambooUser.emailUserType", label: "Email User Type" },
+    { value: "extutvjwj5c_bambooUser.intacctBudgetCode", label: "Budget Code" },
+    { value: "extutvjwj5c_bambooUser.Division", label: "Division" },
+    { value: "extutvjwj5c_bambooUser.employementStatus", label: "Employement Status" },    
   ];
 
   const pageSizes = [
