@@ -16,6 +16,8 @@ import { CippCopyToClipBoard } from "../../../../../components/CippComponents/Ci
 import { CippTimeAgo } from "../../../../../components/CippComponents/CippTimeAgo";
 import { Button, Alert } from "@mui/material";
 import { Box } from "@mui/system";
+import get from "lodash/get";
+
 const Page = () => {
   const userSettingsDefaults = useSettings();
   const router = useRouter();
@@ -48,11 +50,15 @@ const Page = () => {
   useEffect(() => {
     if (userRequest.isSuccess) {
       const user = userRequest.data?.[0];
-      //if we have userSettingsDefaults.userAttributes set, grab the .label from each userSsettingsDefaults, then set defaultAttributes.${label}.value to user.${label}
+      // Resolve custom attributes from the configured Graph path, while keeping label-based
+      // fallback support for legacy flat properties.
       let defaultAttributes = {};
       if (userSettingsDefaults.userAttributes) {
         userSettingsDefaults.userAttributes.forEach((attribute) => {
-          defaultAttributes[attribute.label] = { Value: user?.[attribute.label] };
+          const attributePath = attribute.value || attribute.label;
+          defaultAttributes[attribute.label] = {
+            Value: user?.[attributePath] ?? get(user, attributePath) ?? user?.[attribute.label],
+          };
         });
       }
 
