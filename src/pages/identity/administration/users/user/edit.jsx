@@ -23,12 +23,26 @@ const Page = () => {
   const router = useRouter();
   const { userId } = router.query;
   const [waiting, setWaiting] = useState(false);
+  const tenant = router.query.tenantFilter ?? userSettingsDefaults.currentTenant;
 
   const userRequest = ApiGetCall({
-    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${userSettingsDefaults.currentTenant}`,
-    queryKey: `ListUsers-${userId}`,
+    url: `/api/ListUsers?UserId=${userId}&tenantFilter=${tenant}`,
+    queryKey: `ListUsers-${userId}-${tenant}`,
     waiting: waiting,
   });
+
+  const userExtensionRequest = ApiGetCall({
+    url: "/api/ListGraphRequest",
+    data: {
+      Endpoint: `users/${userId}`,
+      tenantFilter: tenant,
+      $select: "id,extutvjwj5c_bambooUser",
+    },
+    queryKey: `UserExtension-${userId}-${tenant}`,
+    waiting: waiting,
+  });
+
+  const isUserFetching = userRequest.isFetching || userExtensionRequest.isFetching;
 
   // add useEffect to refetch user data when userId changes - also set waiting to false if userId is undefined
   useEffect(() => {
@@ -49,7 +63,21 @@ const Page = () => {
 
   useEffect(() => {
     if (userRequest.isSuccess) {
-      const user = userRequest.data?.[0];
+      let extensionUser = null;
+      if (userExtensionRequest.isSuccess && userExtensionRequest.data) {
+        if (Array.isArray(userExtensionRequest.data.Results)) {
+          extensionUser = userExtensionRequest.data.Results[0];
+        } else if (userExtensionRequest.data.Results) {
+          extensionUser = userExtensionRequest.data.Results;
+        } else {
+          extensionUser = userExtensionRequest.data;
+        }
+      }
+
+      const user = {
+        ...(userRequest.data?.[0] || {}),
+        ...(extensionUser || {}),
+      };
       // Resolve custom attributes from the configured Graph path, while keeping label-based
       // fallback support for legacy flat properties.
       let defaultAttributes = {};
@@ -69,7 +97,7 @@ const Page = () => {
         ...user,
         usageLocation: usageLocation,
         defaultAttributes: defaultAttributes,
-        tenantFilter: userSettingsDefaults.currentTenant,
+        tenantFilter: tenant,
         licenses: user.assignedLicenses.map((license) => ({
           label: getCippLicenseTranslation([license]),
           value: license.skuId,
@@ -77,7 +105,14 @@ const Page = () => {
       });
       formControl.trigger();
     }
-  }, [userRequest.isSuccess, userRequest.data, userRequest.isLoading]);
+  }, [
+    userRequest.isSuccess,
+    userRequest.data,
+    userRequest.isLoading,
+    userExtensionRequest.isSuccess,
+    userExtensionRequest.data,
+    tenant,
+  ]);
 
   // Set the title and subtitle for the layout
   const title = userRequest.isSuccess ? userRequest.data?.[0]?.displayName : "Loading...";
@@ -123,7 +158,7 @@ const Page = () => {
       tabOptions={tabOptions}
       title={title}
       subtitle={subtitle}
-      isFetching={userRequest.isLoading}
+      isFetching={isUserFetching}
     >
       {userRequest.isSuccess && userRequest.data?.[0]?.onPremisesSyncEnabled && (
         <Alert severity="error" sx={{ mb: 1 }}>
@@ -132,7 +167,7 @@ const Page = () => {
         </Alert>
       )}
       <CippFormPage
-        queryKey={[`ListUsers-${userId}`, `Licenses-${userSettingsDefaults.currentTenant}`]}
+        queryKey={[`ListUsers-${userId}-${tenant}`, `UserExtension-${userId}-${tenant}`, `Licenses-${tenant}`]}
         formControl={formControl}
         title={title}
         hideBackButton={true}
@@ -140,8 +175,8 @@ const Page = () => {
         formPageType="Edit"
         postUrl="/api/EditUser"
       >
-        {userRequest.isFetching && <CippFormSkeleton layout={[2, 1, 2, 1, 1, 1, 2, 2, 2, 2, 3]} />}
-        {!userRequest.isFetching && userRequest.isSuccess && (
+        {isUserFetching && <CippFormSkeleton layout={[2, 1, 2, 1, 1, 1, 2, 2, 2, 2, 3]} />}
+        {!isUserFetching && userRequest.isSuccess && (
           <Box sx={{ my: 2 }}>
             <CippAddEditUser
               formControl={formControl}
