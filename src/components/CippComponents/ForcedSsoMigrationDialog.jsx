@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { ApiGetCall, ApiPostCall } from '../../api/ApiCall'
 
-export const ForcedSsoMigrationDialog = () => {
+export const ForcedSsoMigrationDialog = ({ setupCompleted = true }) => {
   const [multiTenant, setMultiTenant] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -31,7 +31,14 @@ export const ForcedSsoMigrationDialog = () => {
   const forceSsoMigration = currentRole.data?.forceSsoMigration
   const hasPermission = permissions.includes('CIPP.AppSettings.ReadWrite')
 
-  const open = !!(currentRole.isSuccess && hasPermission && forceSsoMigration?.status === 'pending')
+  // Hold the forced migration behind initial setup — the setup wizard must be
+  // reachable (and the SAM app configured) before SSO migration can succeed.
+  const open = !!(
+    currentRole.isSuccess &&
+    hasPermission &&
+    forceSsoMigration?.status === 'pending' &&
+    setupCompleted
+  )
 
   const result = ssoSetup.data?.data?.Results ?? ssoSetup.data?.Results
   const isSuccess = result?.severity === 'success'
@@ -61,7 +68,7 @@ export const ForcedSsoMigrationDialog = () => {
         {!submitted ? (
           <>
             <Typography sx={{ mb: 2 }}>
-              Your CIPP instance requires a dedicated <strong>CIPP-SSO</strong> app registration in
+              Your CIPP instance requires a dedicated <strong> CIPP-SSO </strong> app registration in
               your tenant for authentication. This gives you full control over Conditional Access
               policies, MFA requirements, and session management for your CIPP users.
             </Typography>
@@ -99,7 +106,9 @@ export const ForcedSsoMigrationDialog = () => {
                 'SSO migration failed. Please try again.'}
             </Alert>
             <Typography variant="body2" color="text.secondary">
-              If this error persists, contact your CIPP administrator.
+              The app registration may have been created already — clicking <strong>Try Again</strong>{' '}
+              will pick up where it left off rather than starting over. If the error persists,
+              contact your CIPP administrator.
             </Typography>
           </>
         ) : null}
